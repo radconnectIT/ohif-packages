@@ -1,0 +1,8 @@
+.idea
+*.key
+*.log
+v8.log
+node_modules
+.npm
+.vscode
+.DS_Store
