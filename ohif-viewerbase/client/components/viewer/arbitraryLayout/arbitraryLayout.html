@@ -1,0 +1,11 @@
+<template name="arbitraryLayout">
+    <div id='imageViewerViewports'>
+        {{#each viewport in viewportData}}
+            <div class="viewportContainer" style="height:{{viewport.height}}%;width:{{viewport.width}}%;">
+                <div class="removable">
+                    {{>imageViewerViewport (clone viewport)}}
+                </div>
+            </div>
+        {{/each}}
+    </div>
+</template>
