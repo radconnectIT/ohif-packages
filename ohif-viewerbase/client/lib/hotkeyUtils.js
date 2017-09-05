@@ -366,6 +366,7 @@ const hotkeyUtils = {
     setOHIFHotkeys,
     mergeHotkeys,
     enableHotkeys,
+    bindHotkey
 };
 
 export { hotkeyUtils };
