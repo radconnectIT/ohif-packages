@@ -17,7 +17,7 @@ Package.onUse(function(api) {
     api.use('check');
 
     // Router dependencies
-    api.use('iron:router@1.0.13', 'client');
+    api.use('iron:router@1.1.2', 'client');
 
     // Component's library dependencies
     api.use('natestrauser:select2@4.0.1', 'client');
