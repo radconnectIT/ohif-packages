@@ -180,12 +180,12 @@ const setHotkeyFunctions = (toolManager = OHIF.viewer.toolManager, viewportUtils
         resetStack() {
             const button = document.getElementById('resetStack');
             flashButton(button);
-            resetStack();
+            viewportUtils.resetStack();
         },
         clearImageAnnotations() {
             const button = document.getElementById('clearImageAnnotations');
             flashButton(button);
-            clearImageAnnotations();
+            viewportUtils.clearImageAnnotations();
         },
         cineDialog () {
             /**
@@ -286,7 +286,7 @@ function bindHotkey(hotkey, task) {
     var hotkeyFunctions = OHIF.viewer.hotkeyFunctions;
 
     // Only bind defined, non-empty HotKeys
-    if (!hotkey || hotkey === '') {
+    if (!hotkeyFunctions || !hotkey || hotkey === '') {
         return;
     }
 

@@ -505,7 +505,7 @@ export class LayoutManager extends EventSource {
      * in the viewports.
      * If no viewportData or no viewports defined, it renders the default viewport data.
      */
-    updateViewports() {
+    updateViewports(viewportsState) {
         OHIF.log.info('LayoutManager updateViewports');
 
         if (!this.viewportData ||
@@ -526,9 +526,9 @@ export class LayoutManager extends EventSource {
             const viewportDataAndLayoutProps = $.extend(viewportData, layoutProps);
             data.viewportData.push(viewportDataAndLayoutProps);
 
-            if (this.elementsState && this.elementsState.length) {
-                const elementState = this.elementsState[viewportIndex] || {};
-                data.elementData.push(elementState.data);
+            if (viewportsState && viewportsState.length) {
+                const viewportState = viewportsState[viewportIndex] || {};
+                data.elementData.push(viewportState.data);
             }
         });
 
@@ -609,14 +609,14 @@ export class LayoutManager extends EventSource {
         this.previousViewportData = this.viewportData.slice(0);
 
         // Backup previous element data to restore them later
-        this.previousEnabledElementsState = this.getEnabledElementsState();
+        this.previousViewportsState = this.getViewportsState();
 
         const singleViewportData = $.extend({}, this.viewportData[viewportIndex]);
         singleViewportData.rows = 1;
         singleViewportData.columns = 1;
         singleViewportData.viewportIndex = 0;
 
-        const enlargedElementState = this.previousEnabledElementsState[viewportIndex];
+        const enlargedElementState = this.previousViewportsState[viewportIndex];
 
         const data = {
             viewportData: [singleViewportData],
@@ -636,14 +636,14 @@ export class LayoutManager extends EventSource {
 
         this.updateSession();
 
-        // Defer the execution because the element is not enabled yet
+        // Deferring the execution because the element is not enabled yet
         Meteor.defer(() => {
-            const elementState = this.previousEnabledElementsState[this.zoomedViewportIndex];
-            this.updateViewportElementsState([elementState]);
+            const viewportState = this.previousViewportsState[this.zoomedViewportIndex];
+            this.updateViewportsState([viewportState]);
         });
     }
 
-    getEnabledElementsState() {
+    getViewportsState() {
         const $elements = $(this.parentNode).find('.imageViewerViewport');
 
         return _.map($elements, element => {
@@ -656,7 +656,7 @@ export class LayoutManager extends EventSource {
                 data = enabledElement.data;
                 viewport = cornerstone.getViewport(element);
             } catch (e) {
-                OHIF.log.warn('LayoutManager getEnabledElementsState: element is not enabled');
+                OHIF.log.warn('LayoutManager getViewportsState: element is not enabled');
                 enabled = false;
             }
 
@@ -668,37 +668,36 @@ export class LayoutManager extends EventSource {
         });
     }
 
-    updateViewportElementsState(elementsState) {
+    updateViewportsState(viewportsState) {
         const $imageViewerViewports = $(this.parentNode).find('.imageViewerViewport');
 
-        if (!$imageViewerViewports.length || !elementsState) {
+        if (!$imageViewerViewports.length || !viewportsState) {
             return;
         }
 
         $imageViewerViewports.each((index, imageViewerViewport) => {
-            const elementState = elementsState[index];
-            this.restoreElementState(imageViewerViewport, elementState);
+            const viewportState = viewportsState[index];
+            this.restoreViewportState(imageViewerViewport, viewportState);
         });
 
         this.dispatch('enabledElementsStateUpdated');
     }
 
-    restoreElementState(element, elementState) {
+    restoreViewportState(element, viewportState) {
         let enabledElement;
 
-        if (elementState.enabled === false) {
+        if (viewportState.enabled === false) {
             return;
         }
 
         try {
             enabledElement = cornerstone.getEnabledElement(element);
         } catch (error) {
-            OHIF.log.warn('LayoutManager restoreElementState: element is not enabled');
+            OHIF.log.warn('LayoutManager restoreViewportState: element is not enabled');
             return;
         }
 
-        enabledElement.data = elementState.data;
-        cornerstone.setViewport(element, elementState.viewport);
+        cornerstone.setViewport(element, viewportState.viewport);
     }
 
     /**
@@ -770,19 +769,18 @@ export class LayoutManager extends EventSource {
         this.previousViewportData[this.zoomedViewportIndex].viewportIndex = this.zoomedViewportIndex;
         this.viewportData = this.previousViewportData;
 
-        const newElementsState = this.previousEnabledElementsState.slice(0);
-        const enlargedElementState = this.getEnabledElementsState()[0];
+        const viewportsState = this.previousViewportsState.slice(0);
+        const enlargedElementState = this.getViewportsState()[0];
 
         // Update the element at zoomedViewportIndex by its new state
         // The user can have updated something when it was enalarged
-        newElementsState[this.zoomedViewportIndex] = enlargedElementState;
-        this.elementsState = newElementsState;
+        viewportsState[this.zoomedViewportIndex] = enlargedElementState;
 
-        this.updateViewports();
+        this.updateViewports(viewportsState);
 
-        // Defer the execution because the element is not enabled yet
+        // Deferring the execution because the element is not enabled yet
         Meteor.defer(() => {
-            this.updateViewportElementsState(newElementsState);
+            this.updateViewportsState(viewportsState);
         });
     }
 
@@ -794,7 +792,7 @@ export class LayoutManager extends EventSource {
     toggleEnlargement(viewportIndex) {
         OHIF.log.info(`LayoutManager toggleEnlargement: ${viewportIndex}`);
 
-        this.dispatch('toggleEnlargement');
+        this.dispatch('toggleEnlargement', { isZoomed: this.isZoomed });
 
         if (this.isZoomed) {
             this.resetPreviousLayout();

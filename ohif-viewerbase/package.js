@@ -129,6 +129,7 @@ Package.onUse(function(api) {
     api.addFiles('client/components/viewer/gridLayout/gridLayout.styl', 'client');
 
     api.addFiles('client/components/viewer/arbitraryLayout/arbitraryLayout.html', 'client');
+    api.addFiles('client/components/viewer/arbitraryLayout/arbitraryLayout.js', 'client');
 
     api.addFiles('client/components/viewer/loadingIndicator/loadingIndicator.html', 'client');
     api.addFiles('client/components/viewer/loadingIndicator/loadingIndicator.js', 'client');

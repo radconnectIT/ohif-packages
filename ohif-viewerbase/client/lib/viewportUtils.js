@@ -151,11 +151,16 @@ const resetViewport = element => {
     }
 };
 
-const clearTools = element => {
+const clearImageAnnotations = element => {
     const toolStateManager = cornerstoneTools.globalImageIdSpecificToolStateManager;
     element = element || getActiveViewportElement();
     toolStateManager.clear(element);
     cornerstone.updateImage(element);
+};
+
+const resetStack = () => {
+    clearImageAnnotations();
+    resetViewport();
 };
 
 const linkStackScroll = () => {
@@ -336,8 +341,9 @@ const viewportUtils = {
     invert,
     flipV,
     flipH,
+    resetStack,
     resetViewport,
-    clearTools,
+    clearImageAnnotations,
     linkStackScroll,
     toggleDialog,
     toggleCinePlay,

@@ -1,9 +1,9 @@
 <template name="arbitraryLayout">
     <div id='imageViewerViewports'>
         {{#each viewport in viewportData}}
-            <div class="viewportContainer" style="height:{{viewport.height}}%;width:{{viewport.width}}%;">
+            <div class="viewportContainer" style="height:{{height @index}}%;width:{{width @index}}%;">
                 <div class="removable">
-                    {{>imageViewerViewport (clone viewport)}}
+                    {{>imageViewerViewport (clone viewport elementData=(getElementData @index))}}
                 </div>
             </div>
         {{/each}}
