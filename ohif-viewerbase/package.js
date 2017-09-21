@@ -5,17 +5,17 @@ Package.describe({
 });
 
 Package.onUse(function(api) {
-    api.versionsFrom('1.4');
+    api.versionsFrom('1.4.2');
 
-    api.use('ecmascript');
-    api.use('standard-app-packages');
-    api.use('http');
-    api.use('jquery');
-    api.use('stylus');
-    api.use('fastclick');
-    api.use('momentjs:moment');
+    api.use('ecmascript@0.8.2');
+    api.use('standard-app-packages@1.0.9');
+    api.use('http@1.2.10');
+    api.use('jquery@1.11.10');
+    api.use('stylus@2.513.9');
+    api.use('fastclick@1.0.13');
+    api.use('momentjs:moment@2.18.1');
     api.use('validatejs');
-    api.use('underscore');
+    api.use('underscore@1.0.10');
 
     // Our custom packages
     api.use('ohif:design');

@@ -5,16 +5,16 @@ Package.describe({
 });
 
 Package.onUse(function(api) {
-    api.versionsFrom('1.4');
+    api.versionsFrom('1.4.2');
 
-    api.use('ecmascript');
-    api.use('standard-app-packages');
-    api.use('jquery');
-    api.use('stylus');
-    api.use('underscore');
-    api.use('templating');
-    api.use('reactive-var');
-    api.use('check');
+    api.use('ecmascript@0.8.2');
+    api.use('standard-app-packages@1.0.9');
+    api.use('jquery@1.11.10');
+    api.use('stylus@2.513.9');
+    api.use('underscore@1.0.10');
+    api.use('templating@1.3.2');
+    api.use('reactive-var@1.0.11');
+    api.use('check@1.2.5');
 
     // Router dependencies
     api.use('iron:router@1.1.2', 'client');

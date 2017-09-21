@@ -5,12 +5,12 @@ Package.describe({
 });
 
 Package.onUse(function(api) {
-    api.versionsFrom('1.3.5.1');
+    api.versionsFrom('1.4.2');
 
-    api.use('ecmascript');
-    api.use('standard-app-packages');
-    api.use('jquery');
-    api.use('stylus');
+    api.use('ecmascript@0.8.2');
+    api.use('standard-app-packages@1.0.9');
+    api.use('jquery@1.11.10');
+    api.use('stylus@2.513.9');
 
     api.addAssets('assets/theme-icons.png', 'client');
 

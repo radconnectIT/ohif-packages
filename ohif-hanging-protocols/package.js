@@ -5,17 +5,17 @@ Package.describe({
 });
 
 Package.onUse(function(api) {
-  api.versionsFrom('1.4');
+  api.versionsFrom('1.4.2');
 
-  api.use('ecmascript');
-  api.use('standard-app-packages');
-  api.use('jquery');
-  api.use('stylus');
-  api.use('random');
-  api.use('templating');
+  api.use('ecmascript@0.8.2');
+  api.use('standard-app-packages@1.0.9');
+  api.use('jquery@1.11.10');
+  api.use('stylus@2.513.9');
+  api.use('random@1.0.10');
+  api.use('templating@1.3.2');
   api.use('natestrauser:select2@4.0.1', 'client');
   api.use('iron:router@1.1.2');
-  api.use('momentjs:moment');
+  api.use('momentjs:moment@2.18.1');
   api.use('validatejs');
 
   // Our custom packages

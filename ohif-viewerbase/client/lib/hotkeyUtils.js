@@ -3,7 +3,7 @@ import { $ } from 'meteor/jquery';
 import { OHIF } from 'meteor/ohif:core';
 import { setActiveViewport } from './setActiveViewport';
 import { panelNavigation } from './panelNavigation';
-import { WLPresets } from './WLPresets';
+import { WLPresets as OHIFWLPresets } from './WLPresets';
 
 Meteor.startup(function() {
     OHIF.viewer.defaultHotkeys = {
@@ -282,7 +282,7 @@ function flashButton(button) {
  * @param  {String} hotkey keyboard key
  * @param  {String} task   task function name
  */
-function bindHotkey(hotkey, task) {
+function bindHotkey(hotkey, task, WLPresets = OHIFWLPresets) {
     var hotkeyFunctions = OHIF.viewer.hotkeyFunctions;
 
     // Only bind defined, non-empty HotKeys
@@ -320,7 +320,7 @@ function bindHotkey(hotkey, task) {
  * OHIF.viewer.hotkeys or a given param
  * @param  {Object} hotkeys hotkey and task mapping (not required). If not given, uses OHIF.viewer.hotkeys
  */
-function enableHotkeys(hotkeys) {
+function enableHotkeys(hotkeys, WLPresets) {
     const viewerHotkeys = hotkeys || OHIF.viewer.hotkeys;
 
     $(document).unbind('keydown');
@@ -333,11 +333,11 @@ function enableHotkeys(hotkeys) {
 
         if (taskHotkeys instanceof Array) {
             taskHotkeys.forEach(function(hotkey) {
-                bindHotkey(hotkey, task);
+                bindHotkey(hotkey, task, WLPresets);
             });
         } else {
             // taskHotkeys represents a single key
-            bindHotkey(taskHotkeys, task);
+            bindHotkey(taskHotkeys, task, WLPresets);
         }
     });
 }
@@ -348,12 +348,12 @@ function enableHotkeys(hotkeys) {
  * @param {ToolManager} toolManager   ToolManager instance. If not given, default is OHIF.viewer.toolManager
  * @param {Object}      viewportUtils Viewport Utils object. If not give, default is OHIF.viewerbase.viewportUtils
  */
-const initHotkeyFunctions = (hotkeys, toolManager, viewportUtils) => {
+const initHotkeyFunctions = (hotkeys, toolManager, viewportUtils, WLPresets) => {
     // Set hotkeys functions
     setHotkeyFunctions(toolManager, viewportUtils);
 
     // Enable hotkeys
-    enableHotkeys(hotkeys);
+    enableHotkeys(hotkeys, WLPresets);
 };
 
 /**

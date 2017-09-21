@@ -8,11 +8,11 @@ Package.describe({
 Package.onUse(function(api) {
 
     // API Version
-    api.versionsFrom('1.4');
+    api.versionsFrom('1.4.2');
 
     // Dependencies
-    api.use('ecmascript');
-    api.use('underscore');
+    api.use('ecmascript@0.8.2');
+    api.use('underscore@1.0.10');
     api.use('ohif:base');
 
     // @TODO: Make sure we need validate.js
