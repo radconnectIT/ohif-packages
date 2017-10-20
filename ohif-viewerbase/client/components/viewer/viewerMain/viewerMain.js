@@ -61,11 +61,10 @@ Template.viewerMain.onCreated(() => {
 
 Template.viewerMain.onRendered(() => {
     const instance = Template.instance();
-    const { studies } = instance.data;
     const parentElement = instance.$('#layoutManagerTarget').get(0);
 
     // Moving global object instances to OHIF.viewer namespace
-    OHIF.viewer.layoutManager = new LayoutManager(parentElement, studies);
+    OHIF.viewer.layoutManager = new LayoutManager(parentElement, OHIF.viewer.Studies);
     OHIF.viewerbase.layoutManager = OHIF.viewer.layoutManager;
 
     // Enable hotkeys

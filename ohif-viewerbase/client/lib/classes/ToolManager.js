@@ -494,11 +494,7 @@ export class ToolManager {
         const dialog = document.getElementById('textMarkerOptionsDialog');
         if (dialog) {
             if (tool === 'spine') {
-                // if the active tool is already spine, toggle it...
-                if (activeTool === 'spine' && dialog.getAttribute('open') === 'open') {
-                    dialog.close();
-                    tool = this.getDefaultTool(); // considering the default tool is not spine... :-)
-                } else if (dialog.getAttribute('open') !== 'open') {
+                if (dialog.getAttribute('open') !== 'open') {
                     dialog.show();
                 }
             } else if (dialog.getAttribute('open') === 'open') {

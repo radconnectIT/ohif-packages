@@ -27,7 +27,7 @@ export class LayoutManager extends EventSource {
     /**
      * Constructor: initializes a Layout Manager object.
      * @param {DOM element}    parentNode DOM element representing the parent node, which wraps the Layout Manager content
-     * @param {Array} studies  Array of studies objects that will be rendered in the Viewer. Each object will be rendered in a div.imageViewerViewport
+     * @param {TypeSafeCollection} studies  TypeSafeCollection of studies that will be rendered in the Viewer. Each object will be rendered in a div.imageViewerViewport
      */
     constructor(parentNode, studies) {
 
@@ -365,6 +365,12 @@ export class LayoutManager extends EventSource {
         }
     }
 
+    setCurrentImageIdIndex(viewportIdx, currentImageIdIndex, currentIndexRange) {
+        this.viewportData[viewportIdx].currentImageIdIndex = currentImageIdIndex;
+        this.viewportData[viewportIdx].currentIndexRange = currentIndexRange;
+        Session.set('imageIndexUpdate', { viewport: viewportIdx, imageIndex: currentImageIdIndex });
+    }
+    
     getWindowIndex(index) {
         return this.currentWindowIndex;
     }
@@ -373,8 +379,85 @@ export class LayoutManager extends EventSource {
         return this.activeViewportIndex;
     }
 
+    getDisplaySetFromViewport(index) {
+        const uid = this.viewportData[index].displaySetInstanceUid;
+        let displaySet = undefined;
+        const allStudies = this.studies.all();
+        for (let i = 0; i < this.studies.count() && !displaySet; i++) {
+            const displaySets = allStudies[i].displaySets;
+            for (let j = 0; j < displaySets.length && !displaySet; j++) {
+              if (displaySets[j].uid === uid) {
+                displaySet = displaySets[j];
+              }
+            }
+        }
+        return displaySet;
+    }
+
+    getAllViewableDisplaySets() {
+        let displaySets = [];
+        for (var i = 0; i < this.viewportData.length; i++) {
+            displaySets.push(this.getDisplaySetFromViewport(i));
+        }
+        return displaySets;
+    }
+
+    getImageIndexFromViewport(index) {
+        return this.viewportData[index].currentImageIdIndex;
+    }
+
+    getImageRangeFromViewport(index) {
+        return this.viewportData[index].currentIndexRange;
+    }
+
+    getViewportsFromDisplaySet(uid) {
+        let indexes = [];
+        let i;
+        for(i = 0; i < this.viewportData.length; i++)
+            if (this.viewportData[i].displaySetInstanceUid === uid)
+                indexes.push(i);
+        return indexes;
+    }
+
+    getRangeOrIndexFromViewport(index) {
+        const range = this.getImageRangeFromViewport(index);
+        if (range && range.length) {
+            return range;
+        } else {
+            return this.getImageIndexFromViewport(index);
+        }
+    }
+
+    getActiveDisplaySetIndex() {
+        if (this.activeViewportIndex === -1) {
+            // no active viewport (mostly in multi-monitor setup)
+            return;
+        }
+
+        return this.viewportData[this.activeViewportIndex].displaySetInstanceUid;
+    }
+  
     isViewportActive(viewportIndex, windowIndex) {
         return this.activeViewportIndex === viewportIndex && (this.currentWindowIndex === windowIndex || isUndefined(windowIndex));
+    }
+
+    isImageVisible(element, imageId) {
+        const idSubString = imageId.split('/')[2];
+        const viewportIndex = $('.imageViewerViewport').index(element);
+        
+        // Get the display sets
+        const displaySet = this.getDisplaySetFromViewport(viewportIndex);
+        for (let i = 0; i < displaySet.images.length; i++) {
+            if (displaySet.images[i].objectId === idSubString) {
+                if (displaySet.seriesInstanceCount === 1 && displaySet.numImageFrames > 1) {
+                    // one multi-frame image
+                    i = parseInt(imageId.split('/')[3], 10);
+                }
+                
+                const index = this.getRangeOrIndexFromViewport(viewportIndex);
+                return Array.isArray(index) ? i >= index[0] &&  i <= index[1] : index === i;
+            }
+        }
     }
 
     /**
@@ -382,8 +465,8 @@ export class LayoutManager extends EventSource {
      * @return {integer} number of viewports
      */
     getNumberOfViewports() {
-        if (this.layoutProps.getNumberOfViewports) {
-            return this.layoutProps.getNumberOfViewports(this.viewportData);
+        if (this.layoutProps.viewportDimensions) {
+            return this.layoutProps.viewportDimensions.length;
         }
 
         return this.layoutProps.rows * this.layoutProps.columns;
@@ -605,6 +688,10 @@ export class LayoutManager extends EventSource {
             return;
         }
 
+        // Store the previous layout template name so we can go back to it
+        this.previousLayoutTemplateName = this.layoutTemplateName;
+        this.previousLayoutProps = this.layoutProps;
+
         // Clone the array for later use
         this.previousViewportData = this.viewportData.slice(0);
 
@@ -626,7 +713,6 @@ export class LayoutManager extends EventSource {
         };
 
         const layoutTemplate = Template.gridLayout;
-
         $(this.parentNode).html('');
         Blaze.renderWithData(layoutTemplate, data, this.parentNode);
 
@@ -768,12 +854,14 @@ export class LayoutManager extends EventSource {
         this.previousViewportData[this.zoomedViewportIndex] = $.extend({}, this.viewportData[0]);
         this.previousViewportData[this.zoomedViewportIndex].viewportIndex = this.zoomedViewportIndex;
         this.viewportData = this.previousViewportData;
+        this.layoutTemplateName = this.previousLayoutTemplateName;
+        this.layoutProps = this.previousLayoutProps;
 
         const viewportsState = this.previousViewportsState.slice(0);
         const enlargedElementState = this.getViewportsState()[0];
 
         // Update the element at zoomedViewportIndex by its new state
-        // The user can have updated something when it was enalarged
+        // The user could have updated something when it was enlarged
         viewportsState[this.zoomedViewportIndex] = enlargedElementState;
 
         this.updateViewports(viewportsState);
@@ -796,12 +884,8 @@ export class LayoutManager extends EventSource {
 
         if (this.isZoomed) {
             this.resetPreviousLayout();
-        } else {
-            // Don't enlarge the viewport if we only have one Viewport
-            // to begin with
-            if (this.getNumberOfViewports() > 1) {
-                this.enlargeViewport(viewportIndex);
-            }
+        } else if (this.isMultipleLayout()) {
+            this.enlargeViewport(viewportIndex);
         }
     }
 
@@ -820,9 +904,9 @@ export class LayoutManager extends EventSource {
         // Iterate over each viewport and register its  details on the sequence map
         viewportDataList.forEach((viewportData, viewportIndex) => {
             // Get the current study
-            const currentStudy = _.findWhere(this.studies, {
+            const currentStudy = this.studies.findBy({
                 studyInstanceUid: viewportData.studyInstanceUid
-            }) || this.studies[0];
+            }) || this.studies.all()[0];
 
             // Get the display sets
             const displaySets = currentStudy.displaySets;
@@ -996,9 +1080,9 @@ export class LayoutManager extends EventSource {
         const viewportData = this.viewportData[viewportIndex];
 
         // Get the current study
-        const currentStudy = _.findWhere(this.studies, {
+        const currentStudy = this.studies.findBy({
             studyInstanceUid: viewportData.studyInstanceUid
-        }) || this.studies[0];
+        }) || this.studies.all()[0];
 
         // Get the display sets
         const displaySets = currentStudy.displaySets;
@@ -1169,7 +1253,7 @@ export class LayoutManager extends EventSource {
      * @return {Boolean} Return if the layout has multiple rows and columns or not
      */
     isMultipleLayout() {
-        return this.layoutProps.row !== 1 && this.layoutProps.columns !== 1;
+        return this.getNumberOfViewports() > 1;
     }
 
 }

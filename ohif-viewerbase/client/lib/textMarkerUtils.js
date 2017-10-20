@@ -3,7 +3,7 @@ import { Blaze } from 'meteor/blaze';
 import { viewportUtils } from './viewportUtils';
 import { hotkeyUtils } from './hotkeyUtils';
 
-const changeTextCallback = (data, eventData, doneChangingTextCallback) => {
+const changeTextCallback = (data, eventData, doneChangingTextCallback, options = {}) => {
     const { toolManager } = OHIF.viewer;
     const dialog = document.getElementById('textMarkerRelabelDialog');
     if (dialog.open === true) {
@@ -66,6 +66,24 @@ const changeTextCallback = (data, eventData, doneChangingTextCallback) => {
     // Unbind our hotkeys
     $(document).unbind('keydown');
 
+    // Clicking outside of the Market Dialog should close it.
+    // The function the calls this method can also pass 'canCloseCallback' in and decide
+    // if the dialog can be closed based on the "data" and current selected value.
+    if (options.closeOnBlur) {
+        $(document).on('click.changeTextMarkerDialog', function (event) {
+            const isDialog = $(event.target).closest('#textMarkerRelabelDialog').length;
+            let canClose = true;
+
+            if (typeof options.canCloseCallback === 'function') {
+                canClose = options.canCloseCallback(data, $select.val());
+            }
+
+            if (!isDialog && canClose) {
+                dialog.close();
+            }
+        });
+    }
+
     // Use keydown since keypress doesn't handle ESC in Chrome
     $dialog.off('keydown');
     $dialog.on('keydown', event => {
@@ -87,6 +105,8 @@ const changeTextCallback = (data, eventData, doneChangingTextCallback) => {
 
     $dialog.off('close');
     $dialog.on('close', () => {
+        $(document).off('click.changeTextMarkerDialog');
+
         // Reset the focus to the active viewport element
         // This makes the mobile Safari keyboard close
         const element = viewportUtils.getActiveViewportElement();

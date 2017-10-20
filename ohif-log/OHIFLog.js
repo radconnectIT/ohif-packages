@@ -38,7 +38,7 @@ export default class OHIFLog {
   _log(type, ...args) {
     const logFunction = this._logger[type];
     if (typeof logFunction === 'function') {
-      logFunction.call(null, ...args);
+      logFunction.call(this._logger, ...args);
     }
   }
 

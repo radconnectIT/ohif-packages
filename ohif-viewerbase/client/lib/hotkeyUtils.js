@@ -54,6 +54,9 @@ const setHotkeyFunctions = (toolManager = OHIF.viewer.toolManager, viewportUtils
         angle() {
             toolManager.setActiveTool('angle');
         },
+        cobbAngle() {
+            toolManager.setActiveTool('cobbAngle');
+        },
         dragProbe() {
             toolManager.setActiveTool('dragProbe');
         },
