@@ -37,21 +37,12 @@ export class TypeSafeCollection extends EventSource {
         // Private Properties
         Object.defineProperties(this, {
             _operationCount: {
-                configurable: false,
-                enumerable: false,
-                writable: false,
                 value: new ReactiveVar(MIN_COUNT)
             },
             _elementList: {
-                configurable: false,
-                enumerable: false,
-                writable: false,
                 value: []
             },
             _reentrancy: {
-                configurable: false,
-                enumerable: false,
-                writable: false,
                 value: {
                     insert: false,
                     update: false,
@@ -67,7 +58,7 @@ export class TypeSafeCollection extends EventSource {
      */
 
     _invalidate() {
-        let count = this._operationCount.get();
+        const count = this._operationCount.get();
         this._operationCount.set(count < MAX_COUNT ? count + 1 : MIN_COUNT);
     }
 
@@ -106,9 +97,9 @@ export class TypeSafeCollection extends EventSource {
             this._reentrancy.update = true;
             let found = this._elementWithPayload(payload, true);
             if (found) {
-                // nothing to do since the element is already in the collection...
+                // nothing to do since the element is already in the collection
                 if (found.id === id) {
-                    // set result to true since the ids match...
+                    // set result to true since the ids match
                     result = true;
                 }
             } else {
@@ -146,9 +137,9 @@ export class TypeSafeCollection extends EventSource {
 
         try {
             this._reentrancy.update = true;
-            let found = this._elementWithPayload(payload, true);
+            const found = this._elementWithPayload(payload, true);
             if (found) {
-                // nothing to do since the element is already in the collection...
+                // nothing to do since the element is already in the collection
                 result = true;
                 this._invalidate();
                 this.dispatch(EVENT_UPDATE, { id: found.id, data: found.payload });
@@ -165,7 +156,7 @@ export class TypeSafeCollection extends EventSource {
      * Insert an element in the collection. On success, the element ID (a unique string) is returned. On failure, returns null.
      * A failure scenario only happens when the given payload is already present in the collection. Note that NO exceptions are thrown!
      * @param {any} payload The element to be stored.
-     * @returns {string} The ID of the inserted element or null if the element already exists...
+     * @returns {string} The ID of the inserted element or null if the element already exists
      */
     insert(payload) {
 
@@ -177,7 +168,7 @@ export class TypeSafeCollection extends EventSource {
 
         try {
             this._reentrancy.insert = true;
-            let found = this._elementWithPayload(payload, true);
+            const found = this._elementWithPayload(payload, true);
             if (!found) {
                 id = Random.id();
                 this._elements(true).push({ id, payload });
@@ -204,10 +195,10 @@ export class TypeSafeCollection extends EventSource {
 
         try {
             this._reentrancy.remove = true;
-            let all = this._elements(), // this will create dependencies for remove operation...
-                length = all.length;
+            const all = this._elements(); // this will create dependencies for remove operation
+            const length = all.length;
             if (length > 0) {
-                let removed = all.splice(0, length).map(item => item.payload);
+                const removed = all.splice(0, length).map(item => item.payload);
                 this._invalidate();
                 this.dispatch(EVENT_REMOVE, removed);
             }
@@ -228,16 +219,16 @@ export class TypeSafeCollection extends EventSource {
             throw new Error('TypeSafeCollection::remove Reentrancy Error');
         }
 
-        let removed = [];
+        const removed = [];
 
         try {
             this._reentrancy.remove = true;
-            let found = this.findAllEntriesBy(propertyMap), // this will create dependencies...
-                foundCount = found.length;
+            const found = this.findAllEntriesBy(propertyMap); // this will create dependencies
+            const foundCount = found.length;
             if (foundCount > 0) {
                 const all = this._elements(true);
                 for (let i = foundCount - 1; i >= 0; i--) {
-                    let item = found[i];
+                    const item = found[i];
                     all.splice(item[2], 1);
                     removed.push(item[0]);
                 }
@@ -258,7 +249,7 @@ export class TypeSafeCollection extends EventSource {
      * @returns {string} The ID of the given element or undefined if the element is not present.
      */
     getElementId(payload) {
-        let found = this._elementWithPayload(payload);
+        const found = this._elementWithPayload(payload);
         return found && found.id;
     }
 
@@ -268,7 +259,7 @@ export class TypeSafeCollection extends EventSource {
      * @returns {number} The position of the given element in the internal list. If the element is not present -1 is returned.
      */
     findById(id) {
-        let found = this._elementWithId(id);
+        const found = this._elementWithId(id);
         return found && found.payload;
     }
 
@@ -296,13 +287,13 @@ export class TypeSafeCollection extends EventSource {
      * @returns {any} If out of bounds, undefined is returned. Otherwise the element in the given position is returned.
      */
     getElementByIndex(index) {
-        let found = ((this._elements())[index >= 0 ? index : -1]);
+        const found = ((this._elements())[index >= 0 ? index : -1]);
         return found && found.payload;
     }
 
     /**
      * Find an element by a criteria defined by the given callback function.
-     * Attention!!! The reactive source will not be notified if no valid callback is supplied...
+     * Attention!!! The reactive source will not be notified if no valid callback is supplied
      * @param {function} callback A callback function which will define the search criteria. The callback
      * function will be passed the collection element, its ID and its index in this very order. The callback
      * shall return true when its criterea has been fulfilled.
@@ -330,13 +321,13 @@ export class TypeSafeCollection extends EventSource {
         let found;
         if (_isObject(options)) {
             // if the "options" argument is provided and is a valid object,
-            // it must be applied to the dataset before search...
+            // it must be applied to the dataset before search
             const all = this.all(options);
             if (all.length > 0) {
                 if (_isObject(propertyMap)) {
                     found = all.find(item => _compareToPropertyMapStrict(propertyMap, item));
                 } else {
-                    found = all[0]; // simply extract the first element...
+                    found = all[0]; // simply extract the first element
                 }
             }
         } else if (_isObject(propertyMap)) {
@@ -350,7 +341,7 @@ export class TypeSafeCollection extends EventSource {
 
     /**
      * Find all elements that strictly match the specified property map.
-     * Attention!!! The reactive source will not be notified if no valid property map is supplied...
+     * Attention!!! The reactive source will not be notified if no valid property map is supplied
      * @param {Object} propertyMap A property map that will be macthed against all collection elements.
      * @returns {Array} An array of entries of all elements that match the given criteria. Each set in
      * in the array has the following format: [ elementData, elementId, elementIndex ].
@@ -360,7 +351,7 @@ export class TypeSafeCollection extends EventSource {
         if (_isObject(propertyMap)) {
             this._elements().forEach((item, index) => {
                 if (_compareToPropertyMapStrict(propertyMap, item.payload)) {
-                    // Match! Add it to the found list...
+                    // Match! Add it to the found list
                     found.push([ item.payload, item.id, index ]);
                 }
             });
@@ -370,7 +361,7 @@ export class TypeSafeCollection extends EventSource {
 
     /**
      * Find all elements that match a specified property map.
-     * Attention!!! The reactive source will not be notified if no valid property map is supplied...
+     * Attention!!! The reactive source will not be notified if no valid property map is supplied
      * @param {Object} propertyMap A property map that will be macthed against all collection elements.
      * @param {Object} options A set of options. Currently only "options.sort" option is supported.
      * @param {Object.SortingSpecifier} options.sort An optional sorting specifier. If a sorting specifier is supplied
@@ -378,7 +369,7 @@ export class TypeSafeCollection extends EventSource {
      * @returns {Array} An array with all elements that match the given criteria and sorted in the specified sorting order.
      */
     findAllBy(propertyMap, options) {
-        const found = this.findAllEntriesBy(propertyMap).map(item => item[0]); // Only payload is relevant...
+        const found = this.findAllEntriesBy(propertyMap).map(item => item[0]); // Only payload is relevant
         if (_isObject(options)) {
             if ('sort' in options) {
                 _sortListBy(found, options.sort);
@@ -389,7 +380,7 @@ export class TypeSafeCollection extends EventSource {
 
     /**
      * Executes the supplied callback function for each element of the collection.
-     * Attention!!! The reactive source will not be notified if no valid property map is supplied...
+     * Attention!!! The reactive source will not be notified if no valid property map is supplied
      * @param {function} callback The callback function to be executed. The callback is passed the element,
      * its ID and its index in this very order.
      * @returns {void} Nothing is returned.
@@ -418,7 +409,7 @@ export class TypeSafeCollection extends EventSource {
      * @returns {Array} An array with all elements stored in the collection.
      */
     all(options) {
-        let list = this._elements().map(item => item.payload);
+        const list = this._elements().map(item => item.payload);
         if (_isObject(options)) {
             if ('sort' in options) {
                 _sortListBy(list, options.sort);
@@ -464,7 +455,7 @@ const _hasOwnProperty = Object.prototype.hasOwnProperty;
 
 /**
  * Retrieve an object's property value by name. Composite property names (e.g., 'address.country.name') are accepted.
- * @param {Object} targetObject The object we want read the property from...
+ * @param {Object} targetObject The object we want read the property from
  * @param {String} propertyName The property to be read (e.g., 'address.street.name' or 'address.street.number'
  * to read object.address.street.name or object.address.street.number, respectively);
  * @returns {Any} Returns whatever the property holds or undefined if the property cannot be read or reached.
@@ -495,7 +486,7 @@ function _getPropertyValue(targetObject, propertyName) {
  */
 function _compareToPropertyMapStrict(propertyMap, targetObject) {
     let result = false;
-    // "for in" loops do not thown exceptions for invalid data types...
+    // "for in" loops do not thown exceptions for invalid data types
     for (let propertyName in propertyMap) {
         if (_hasOwnProperty.call(propertyMap, propertyName)) {
             if (propertyMap[propertyName] !== _getPropertyValue(targetObject, propertyName)) {
@@ -546,7 +537,7 @@ function _isValidSortingSpecifier(specifiers) {
 function _sortListBy(list, specifiers) {
     if (list instanceof Array && _isValidSortingSpecifier(specifiers)) {
         const specifierCount = specifiers.length;
-        list.sort(function _sortListByCallback(a, b) { // callback name for stack traces...
+        list.sort(function _sortListByCallback(a, b) { // callback name for stack traces
             for (let index = 0; index < specifierCount; index++) {
                 const specifier = specifiers[index];
                 const property = specifier[0];
@@ -555,7 +546,7 @@ function _sortListBy(list, specifiers) {
                 const bValue = _getPropertyValue(b, property);
                 // @TODO: should we check for the types being compared, like:
                 // ~~ if (typeof aValue !== typeof bValue) continue;
-                // Not sure because dates, for example, can be correctly compared to numbers...
+                // Not sure because dates, for example, can be correctly compared to numbers
                 if (aValue < bValue) {
                     return order * -1;
                 }

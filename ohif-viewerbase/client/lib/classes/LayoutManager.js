@@ -843,6 +843,68 @@ export class LayoutManager extends EventSource {
 
     }
 
+    getDefaultViewportData(startingIndex = 0, givenViewportCount = 0, displaySetOverride) {
+        const viewportData = [];
+
+        // Get the number of viewports to be rendered
+        const viewportCount = givenViewportCount > 0 ?
+            givenViewportCount : this.getNumberOfViewports();
+
+        // Get all the display sets for the viewer studies
+        const displaySets = [];
+        this.studies.forEach(study => {
+            study.displaySets.forEach(displaySet => {
+                if (Array.isArray(displaySet.images) && displaySet.images.length > 0) {
+                    displaySets.push(displaySet)
+                }
+            });
+        });
+
+        // Count how many display sets are available
+        const displaySetsLength = displaySets.length;
+
+        // Build viewport data list
+        for (let index = 0; index < viewportCount; index++) {
+            const data = { viewportIndex: index };
+            let selectedDisplaySet;
+            // Check if an override has been specified and found
+            const overrideId = displaySetOverride[index];
+            if (overrideId) {
+                selectedDisplaySet = displaySets.find(displaySet => {
+                    return displaySet.displaySetInstanceUid === overrideId;
+                });
+            }
+            // If not, just pick up one from the available display sets available
+            if (!selectedDisplaySet && index < displaySetsLength) {
+                selectedDisplaySet = displaySets[index];
+            }
+            // If a display set was found, add information to the viewport data structure
+            if (selectedDisplaySet) {
+                const {
+                    images,
+                    studyInstanceUid,
+                    seriesInstanceUid,
+                    displaySetInstanceUid
+                } = selectedDisplaySet;
+                const sopInstanceUid = images[0] && images[0].getSOPInstanceUID
+                    ? images[0].getSOPInstanceUID()
+                    : '';
+                data.studyInstanceUid = studyInstanceUid;
+                data.seriesInstanceUid = seriesInstanceUid;
+                data.displaySetInstanceUid = displaySetInstanceUid;
+                data.sopInstanceUid = sopInstanceUid;
+            }
+            // Append data to the viewport data list
+            viewportData[index] = data;
+        }
+
+        return viewportData;
+    }
+
+    getCurrentViewportData() {
+        return Array.isArray(this.viewportData) ? this.viewportData.slice() : [];
+    }
+
     /**
      * Resets to the previous layout configuration.
      * Useful after enlarging a single viewport.
