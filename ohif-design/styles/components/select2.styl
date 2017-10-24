@@ -8,63 +8,72 @@ $gray4 = #676767
 $gray5 = #3E3E3E
 $borderRadius = 2px
 
-span.select2.select2-container
-  font-weight: normal
 
-  span.select2-selection
-    &:hover, &:focus
-      span.select2-selection__arrow
-        background-color: $gray3
+/*
+  TODO: when, and if, this code goes back to OHIF it will be necessary to add some way
+  to make it unique to OHIF, like adding an ID at some point, this way this code won't
+  conflict with other viewers styles. Another suggestion is to use select2 themes. Ex:
+    $('#mySelect').select2({theme: 'ohifDropdown'}) --> theme for a single element
+    $.fn.select2.defaults.set('theme', 'ohifDropdown') --> default theme for all
+*/
+#ohif-viewer
+  span.select2.select2-container
+    font-weight: normal
 
-  span.select2-selection
-    border: 0
-    border-radius: $borderRadius
+    span.select2-selection
+      &:hover, &:focus
+        span.select2-selection__arrow
+          background-color: $gray3
 
-    &, span.select2-selection__rendered, span.select2-selection__arrow
-      height: 30px
-
-  span.select2-selection__rendered
-    line-height: 34px
-    padding-left: 11px
-
-  span.select2-selection__arrow
-    theme('border-left', '1px solid $primaryBackgroundColor')
-    background-color: $gray1
-    border-top-right-radius: $borderRadius
-    border-bottom-right-radius: $borderRadius
-    right: 0
-    top: 0
-    transition(background-color 0.3s ease)
-    width: 20px
-
-    b
-      display: none
-
-  span.select2-selection--multiple
-    background-color: $gray2
-    min-height: 30px
-
-    input.select2-search__field
-      color: $gray5
-      placeholder-color($gray5)
-
-    li.select2-selection__choice
-      theme('border-color', '$uiGray')
-      background-color: #FFF
+    span.select2-selection
+      border: 0
       border-radius: $borderRadius
-      color: $gray5
-      font-size: 12px
-      line-height: 22px
-      margin-top: 3px
 
-    span.select2-selection__choice__remove
-      color: $gray4
-      float: right
-      font-size: 20px
-      font-weight: 300
-      line-height: 20px
-      margin-left: 6px
-      margin-right: 0
+      &, span.select2-selection__rendered, span.select2-selection__arrow
+        height: 30px
 
-    span.select2-selection__clear
-      display: none
+    span.select2-selection__rendered
+      line-height: 34px
+      padding-left: 11px
+
+    span.select2-selection__arrow
+      theme('border-left', '1px solid $primaryBackgroundColor')
+      background-color: $gray1
+      border-top-right-radius: $borderRadius
+      border-bottom-right-radius: $borderRadius
+      right: 0
+      top: 0
+      transition(background-color 0.3s ease)
+      width: 20px
+
+      b
+        display: none
+
+    span.select2-selection--multiple
+      background-color: $gray2
+      min-height: 30px
+
+      input.select2-search__field
+        color: $gray5
+        placeholder-color($gray5)
+
+      li.select2-selection__choice
+        theme('border-color', '$uiGray')
+        background-color: #FFF
+        border-radius: $borderRadius
+        color: $gray5
+        font-size: 12px
+        line-height: 22px
+        margin-top: 3px
+
+      span.select2-selection__choice__remove
+        color: $gray4
+        float: right
+        font-size: 20px
+        font-weight: 300
+        line-height: 20px
+        margin-left: 6px
+        margin-right: 0
+
+      span.select2-selection__clear
+        display: none
