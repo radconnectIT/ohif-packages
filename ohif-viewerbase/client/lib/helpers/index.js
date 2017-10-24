@@ -6,6 +6,7 @@ import { isTouchDevice } from './isTouchDevice';
 import { formatPN } from './formatPN';
 import { formatDA } from './formatDA';
 import { formatTM } from './formatTM';
+import { toHTMLString } from './toHTMLString';
 
 /**
  * Helpers with side effects only...
@@ -33,7 +34,8 @@ const helpers = {
     isTouchDevice,
     formatPN,
     formatDA,
-    formatTM
+    formatTM,
+    toHTMLString
 };
 
 export { helpers };

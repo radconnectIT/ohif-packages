@@ -444,6 +444,9 @@ export class LayoutManager extends EventSource {
     isImageVisible(element, imageId) {
         const idSubString = imageId.split('/')[2];
         const viewportIndex = $('.imageViewerViewport').index(element);
+        if (viewportIndex === -1){
+            return false;
+        }
         
         // Get the display sets
         const displaySet = this.getDisplaySetFromViewport(viewportIndex);
