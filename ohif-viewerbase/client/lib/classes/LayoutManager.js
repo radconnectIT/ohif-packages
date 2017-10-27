@@ -875,8 +875,8 @@ export class LayoutManager extends EventSource {
                 });
             }
             // If not, just pick up one from the available display sets available
-            if (!selectedDisplaySet && index < displaySetsLength) {
-                selectedDisplaySet = displaySets[index];
+            if (!selectedDisplaySet && startingIndex + index < displaySetsLength) {
+                selectedDisplaySet = displaySets[startingIndex + index];
             }
             // If a display set was found, add information to the viewport data structure
             if (selectedDisplaySet) {
