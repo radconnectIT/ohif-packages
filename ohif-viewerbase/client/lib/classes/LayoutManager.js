@@ -449,6 +449,9 @@ export class LayoutManager extends EventSource {
 
         const displaySet = this.getDisplaySetFromViewport(viewportIndex);
         const imageIds = OHIF.viewerbase.stackManager.getImageIds(displaySet.uid);
+        if(imageIds === undefined) {
+            return false;
+        }
         const imageIndex = imageIds.findIndex( e => e === imageId);
         const indexFromViewport = this.getRangeOrIndexFromViewport(viewportIndex);
         if (Array.isArray(indexFromViewport)){
