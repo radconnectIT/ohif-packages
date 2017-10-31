@@ -442,25 +442,19 @@ export class LayoutManager extends EventSource {
     }
 
     isImageVisible(element, imageId) {
-        const idSubString = imageId.split('/')[2];
         const viewportIndex = $('.imageViewerViewport').index(element);
         if (viewportIndex === -1){
             return false;
         }
-        
-        // Get the display sets
+
         const displaySet = this.getDisplaySetFromViewport(viewportIndex);
-        for (let i = 0; i < displaySet.images.length; i++) {
-            if (displaySet.images[i].objectId === idSubString) {
-                if (displaySet.seriesInstanceCount === 1 && displaySet.numImageFrames > 1) {
-                    // one multi-frame image
-                    i = parseInt(imageId.split('/')[3], 10);
-                }
-                
-                const index = this.getRangeOrIndexFromViewport(viewportIndex);
-                return Array.isArray(index) ? i >= index[0] &&  i <= index[1] : index === i;
-            }
+        const imageIds = OHIF.viewerbase.stackManager.getImageIds(displaySet.uid);
+        const imageIndex = imageIds.findIndex( e => e === imageId);
+        const indexFromViewport = this.getRangeOrIndexFromViewport(viewportIndex);
+        if (Array.isArray(indexFromViewport)){
+            return imageIndex >= indexFromViewport[0] &&  imageIndex <= indexFromViewport[1] ? indexFromViewport.length : false;
         }
+        return indexFromViewport === imageIndex;
     }
 
     /**
